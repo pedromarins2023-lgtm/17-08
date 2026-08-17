@@ -1,0 +1,18 @@
+<app-header></app-header>
+<main class="container-principal">
+  <!--CONTROLES TEMPORÁRIOS DE LOGIN -->
+  <section class="bloco-controle">
+    <button (click)="login()">Login</button>
+    <button (click)="logout()">Logout</button>
+    <p>Status: {{ usuarioLogado() ? 'Logado' : 'Deslogado' }}</p>
+  </section>
+   <img src="01zLOGO.png" alt="Logo" width="700" style="display: block; margin: 0 auto;">
+  <hr />
+  <!--CONTEÚDO DINÂMICO DAS ROTAS -->
+  <router-outlet></router-outlet>
+ 
+
+
+
+</main>
+
