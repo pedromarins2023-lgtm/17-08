@@ -1,154 +1,83 @@
-import {
-  Component,
-  signal,
-  computed,
-  effect,
-  inject
-} from '@angular/core';
-
+import { Component, signal, computed, effect, inject } from '@angular/core';
+import { Produto } from '../produto/produto';
 import { ProdutosService } from '../../../core/services/produtos.service';
 import { MatButtonModule } from '@angular/material/button';
 import { CarrinhoService } from '../../../core/services/carrinho.service';
 
 @Component({
   selector: 'app-lista-produtos',
-  imports: [MatButtonModule],
+  imports: [Produto, MatButtonModule],
   templateUrl: './lista-produtos.html',
   styleUrl: './lista-produtos.css',
 })
 export class ListaProdutos {
-
-  // =========================
-  // PRODUTOS
-  // =========================
-
   private produtosService = inject(ProdutosService);
-
-  produtos = this.produtosService.produtos;
-
-
-  // =========================
-  // CARRINHO
-  // =========================
-
   carrinhoService = inject(CarrinhoService);
 
-  carrinho = this.carrinhoService.itens;
-
   quantidadeCarrinho = this.carrinhoService.quantidade;
-
   totalCarrinho = this.carrinhoService.total;
-
-
-  // =========================
-  // ESTADOS
-  // =========================
-
-  produtoSelecionado = signal<string | null>(null);
 
   erro = signal<string | null>(null);
 
-  carregando = signal(false);
-
-
-  // =========================
-  // COMPUTEDS
-  // =========================
-
-  totalProdutos = computed(() => {
-    return this.produtos().length;
-  });
-
-  valorTotal = computed(() => {
-    return this.produtos().reduce(
-      (total, item) => total + item.preco,
-      0
-    );
-  });
-
-
-  // =========================
-  // CONSTRUCTOR
-  // =========================
-
   constructor() {
+    // carrega da API
+    this.carregarProdutos();
 
     effect(() => {
-      console.log(
-        'Produto selecionado:',
-        this.produtoSelecionado()
-      );
+      console.log('Lista de produtos alterada:', this.produtos());
     });
-
     effect(() => {
-      console.log(
-        'Valor total atualizado:',
-        this.valorTotal()
-      );
+      console.log('Valor total atualizado:', this.valorTotal());
     });
-
     effect(() => {
       if (typeof document !== 'undefined') {
-        document.title =
-          `(${this.totalProdutos()}) Minha Loja`;
+        document.title = `(${this.totalProdutos()}) Minha Loja`;
       }
     });
-
   }
 
+  carregarProdutos() {
+    this.erro.set(null); // limpa erroanterior
+    this.carregando.set(true); // ativaloading
+    this.produtosService.buscarProdutos().subscribe({
+      next: (dados) => {
+        const produtos = this.produtosService.transformarProdutos(dados);
+        this.produtos.set(produtos);
+        this.carregando.set(false);
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar produtos:', erro);
+        this.erro.set('Erro ao carregar produtos. Verifique sua conexão e tente novamente.');
+        this.carregando.set(false);
+      },
+    });
+  }
 
-  // =========================
-  // SELECIONAR PRODUTO
-  // =========================
+  produtoSelecionado = signal<string | null>(null);
+
+  produtos = signal<{ nome: string; preco: number }[]>([]);
+
+  carregando = signal(true);
+
+  totalProdutos = computed(() => this.produtos().length);
+
+  valorTotal = computed(() => {
+    return this.produtos().reduce((total, item) => total + item.preco, 0);
+  });
 
   exibirProduto(nome: string) {
     this.produtoSelecionado.set(nome);
   }
 
-
-  // =========================
-  // ADICIONAR PRODUTO
-  // =========================
-
   adicionarProduto() {
-
-    this.produtosService.produtos.update(listaAtual => [
-      ...listaAtual,
-      {
-        nome: 'Novo jogo',
-        preco: 199.90
-      }
-    ]);
-
+    this.produtos.update((listaAtual) => [...listaAtual, { nome: 'Teclado', preco: 250 }]);
   }
-
-
-  // =========================
-  // SUBSTITUIR PRODUTOS
-  // =========================
 
   substituirProdutos() {
-
-    this.produtosService.produtos.set([
-      {
-        nome: 'Produto novo',
-        preco: 999
-      }
-    ]);
-
+    this.produtos.set([{ nome: 'Produtonovo', preco: 999 }]);
   }
 
-
-  // =========================
-  // ADICIONAR AO CARRINHO
-  // =========================
-
-  adicionarAoCarrinho(
-    produto: { nome: string; preco: number }
-  ) {
-
+  adicionarAoCarrinho(produto: { nome: string; preco: number }) {
     this.carrinhoService.adicionar(produto);
-
   }
-
 }

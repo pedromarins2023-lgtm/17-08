@@ -8,5 +8,4 @@ mat-card {
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-   background: linear-gradient(180deg, #2e2e2e 0%);
 }

@@ -1,32 +1,24 @@
-import { Injectable, signal } from '@angular/core';
-
-export interface Produto {
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+type ProdutoApi = {
+  title: string;
+  price: number;
+};
+type Produto = {
   nome: string;
   preco: number;
-}
-
-@Injectable({
-  providedIn: 'root'
-})
+};
+@Injectable({ providedIn: 'root' })
 export class ProdutosService {
-
-  produtos = signal<Produto[]>([
-    {
-      nome: 'GTA V',
-      preco: 99.90
-    },
-    {
-      nome: 'Minecraft',
-      preco: 89.90
-    },
-    {
-      nome: 'EA Sports FC 26',
-      preco: 299.90
-    },
-    {
-      nome: 'Cyberpunk 2077',
-      preco: 149.90
-    }
-  ]);
-
+  private http = inject(HttpClient);
+  private API = 'https://fakestoreapi.com/products';
+  buscarProdutos() {
+    return this.http.get<ProdutoApi[]>(this.API);
+  }
+  transformarProdutos(dados: ProdutoApi[]): Produto[] {
+    return dados.map((p) => ({
+      nome: p.title,
+      preco: p.price,
+    }));
+  }
 }

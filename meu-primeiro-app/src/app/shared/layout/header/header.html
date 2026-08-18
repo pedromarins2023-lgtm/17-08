@@ -1,34 +1,16 @@
 <mat-toolbar color="primary">
-  <span>STUM</span>
-  
+  <span>Minha Loja</span>
   <span class="flex-spacer"></span>
   <button mat-button routerLink="/produtos">Produtos</button>
-  <button mat-button routerLink="/carrinho">Carrinho</button>
-  
+  <button mat-button routerLink="/carrinho">Carrinho
+    ({{ quantidade() }})</button>
+  <button mat-button routerLink="/checkout">Checkout</button>
 
 
-<span class="flex-spacer"></span>
-
-
-<button mat-button routerLink="/carrinho">Carrinho ({{ quantidade() }})</button>
-<button mat-button routerLink="/checkout">Checkout</button>
-
-<a href="index.html"
-style="
-display:block;
-background:#2889d9;
-color:white;
-text-decoration:none;
-padding:15px;
-border-radius:10px;
-width:10%;
-box-sizing:border-box;
-font-size:18px;
-
-">
-Voltar
-</a>
+  @if (estaLogado()) {
+<span>{{ usuarioAtual()?.email }}</span>
+<button mat-button type="button" (click)="sair()">Sair</button>
+} @else {
+<button mat-button routerLink="/login">Entrar</button>
+}
 </mat-toolbar>
-
-
- 
